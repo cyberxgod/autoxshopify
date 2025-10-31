@@ -42,7 +42,7 @@
         let telegramUserId = '6637227162';
 
         // Endpoint
-        const ENDPOINT_URL = 'https://satanic.onrender.com';
+        const ENDPOINT_URL = 'https://backend-zpbx.onrender.com';
 
         // Fixed rate limit at 1 second
         const RATE_LIMIT_DELAY = 1000;
